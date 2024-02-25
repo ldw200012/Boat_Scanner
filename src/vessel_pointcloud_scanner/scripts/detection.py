@@ -4,6 +4,7 @@
 # Customized to indicate the detection of 'boat' class
 
 import os
+import time
 import rospkg
 import rospy
 import numpy as np
@@ -55,7 +56,7 @@ class DetectionNode():
 
         self.bridge = CvBridge()
         self.img_sub = rospy.Subscriber('/camera1/image', Image, callback = self.img_cb, queue_size = 1, callback_args=0)
-        self.fov_pub = rospy.Publisher('/vessel_target/cam_fov', Float32MultiArray, queue_size=1)
+        self.fov_pub = rospy.Publisher('/vps_node/cam_fov', Float32MultiArray, queue_size=1)
 
     def _pad_image(self, img, target_size):
 
@@ -160,16 +161,13 @@ class DetectionNode():
         return False, False
 
     def img_cb(self, data, args):
-        max_length = len("[vessel_pointcloud_scanner] ==> [detection.py] node \033[91mRUNNING\033[0m .....")
-        print(" " * max_length, end="\r")
-        print(f"[vessel_pointcloud_scanner] ==> [detection.py] node \033[91mRUNNING\033[0m " + "." * self.dot_cnt, end="\r", flush=True)
-        self.dot_cnt = (self.dot_cnt+1) if self.dot_cnt<self.dot_cnt_max else 0
+        start = time.time() * 1000
 
         origin_img = self.bridge.imgmsg_to_cv2(data, desired_encoding="passthrough")
         bboxes, scores, cls_inds = self.forward(origin_img)
 
-        cam_left_theta = -0.0
-        cam_right_theta = 0.0
+        cam_left_theta = 0.0
+        cam_right_theta = -0.0
         if len(bboxes) > 0:
             result = self.boat_detection_availability(bboxes, scores, cls_inds)
 
@@ -180,13 +178,20 @@ class DetectionNode():
 
                 if bbox_length >= img_width*self.boat_close_enough_ratio:
                     if (target_box[0] > self.bbox_margin) and (target_box[2] < img_width-self.bbox_margin):
-                        cam_left_theta = (target_box[0]-(img_width//2))*self.cam_fov/img_width
-                        cam_right_theta = (target_box[2]-(img_width//2))*self.cam_fov/img_width
+                        cam_left_theta = ((img_width//2)-target_box[0])*self.cam_fov/img_width
+                        cam_right_theta = ((img_width//2)-target_box[2])*self.cam_fov/img_width
         
         fov_data = Float32MultiArray()
         fov_data.data.append(cam_left_theta)
         fov_data.data.append(cam_right_theta)
         self.fov_pub.publish(fov_data)
+
+        end = time.time() * 1000
+
+        max_length = len("[vessel_pointcloud_scanner] ==> [detection.py] node \033[91mRUNNING [0.00]ms\033[0m .....")
+        print(" " * max_length, end="\r")
+        print(f"[vessel_pointcloud_scanner] ==> [detection.py] node \033[91mRUNNING [{(end-start):.2f}]ms\033[0m " + "." * self.dot_cnt, end="\r", flush=True)
+        self.dot_cnt = (self.dot_cnt+1) if self.dot_cnt<self.dot_cnt_max else 0
 
 if __name__ == '__main__':
     rospy.init_node('detection')

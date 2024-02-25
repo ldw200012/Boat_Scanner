@@ -1,0 +1,4 @@
+<launch>
+    <node name="detection" pkg="vessel_pointcloud_scanner" type="detection.py" output="screen"/>
+    <node name="vessel_pointcloud_scanner_node" pkg="vessel_pointcloud_scanner" type="vessel_pointcloud_scanner_node" output="screen"/> 
+</launch>
