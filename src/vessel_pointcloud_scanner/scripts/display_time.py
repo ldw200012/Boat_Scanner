@@ -1,15 +1,41 @@
+#!/usr/bin/python3
+
 import rospy
+import sys
+import time
+
+def main():
+    rospy.init_node('nodes_processtime_handler')
+    frame_num = 10
+    rate = rospy.Rate(frame_num) # 10 Hz
+
+    dot_cnt_max = 50
+    dot_cnt_div = frame_num
+    dot_cnt = 1
+
+    while not rospy.is_shutdown():
+        node1_processtime = rospy.get_param("node1_processtime", 0.00)
+        node2_processtime = rospy.get_param("node2_processtime", 0.00)
+
+        # Move the cursor up N lines
+        sys.stdout.write('\x1b[2A')
+
+        # Node 1
+        sys.stdout.write('\x1b[2K')
+        node1_timeprint = f"{node1_processtime:.2f}".zfill(6)
+        print(f"[vessel_pointcloud_scanner] ==> [detection.py] node \033[91mRUNNING [{node1_timeprint}]ms\033[0m " + "." * (int(dot_cnt//dot_cnt_div)), flush=True)
+
+        # Node 2
+        sys.stdout.write('\x1b[2K')
+        node2_timeprint = f"{node2_processtime:.2f}".zfill(6)
+        print(f"[vessel_pointcloud_scanner] ==> [vessel_pointcloud_scanner] node \033[91mRUNNING [{node2_timeprint}]ms\033[0m " + "." * (int(dot_cnt//dot_cnt_div)), flush=True)
+
+        dot_cnt = (dot_cnt+1) if dot_cnt < dot_cnt_max else 1
+
+        rate.sleep()
 
 if __name__ == '__main__':
-    rospy.init_node('nodes_processtime_handler')
-
-    node1_processtime = rospy.get_param("node1_processtime", 0.00)
-    node2_processtime = rospy.get_param("node2_processtime", 0.00)
-
-    node1_max_length = len("[vessel_pointcloud_scanner] ==> [detection.py] node \033[91mRUNNING [0.00]ms\033[0m .....")
-    print(" " * node1_max_length, end="\r")
-    print(f"[vessel_pointcloud_scanner] ==> [detection.py] node \033[91mRUNNING [{node1_processtime:.2f}]ms\033[0m " + "." * self.dot_cnt, end="\r", flush=True)
-
-
-    self.dot_cnt = (self.dot_cnt+1) if self.dot_cnt<self.dot_cnt_max else 0
-
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass

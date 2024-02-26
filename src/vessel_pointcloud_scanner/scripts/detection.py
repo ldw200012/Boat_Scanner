@@ -162,7 +162,7 @@ class DetectionNode():
         return False, False
 
     def img_cb(self, data, args):
-        start = "{:.2f}".format(rospy.Time.now().to_sec() * 1000.0)
+        start = round(rospy.Time.now().to_sec() * 1000.0, 2)
 
         origin_img = self.bridge.imgmsg_to_cv2(data, desired_encoding="passthrough")
         bboxes, scores, cls_inds = self.forward(origin_img)
@@ -187,8 +187,8 @@ class DetectionNode():
         fov_data.data.append(cam_right_theta)
         self.fov_pub.publish(fov_data)
 
-        end = "{:.2f}".format(rospy.Time.now().to_sec() * 1000.0)
-        rospy.set_param("node1_processtime", "{:.2f}".format(end-start))
+        end = round(rospy.Time.now().to_sec() * 1000.0, 2)
+        rospy.set_param("node1_processtime", round(end-start, 2))
 
 if __name__ == '__main__':
     rospy.init_node('detection')

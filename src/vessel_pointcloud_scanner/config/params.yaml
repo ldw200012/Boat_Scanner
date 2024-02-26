@@ -1,4 +1,5 @@
 node1_processtime: 0.00 # millisecond
+node2_processtime: 0.00 # millisecond
 
 point_by_point_z: -1.6 # meter
 point_by_point_r: 5.0 # meter

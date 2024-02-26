@@ -2,6 +2,7 @@
 // Step 2: If any N points (default: 10) within the cluster E Restricted FoV ==> Result
 
 #include "ros/ros.h"
+#include <cmath>
 #include "sensor_msgs/PointCloud2.h"
 #include "std_msgs/Float32MultiArray.h"
 
@@ -40,8 +41,8 @@ ros::Subscriber sub_cam_fov;
 ros::Publisher pub_vessel_pointcloud;
 
 float arr_cam_fov[2] = { 0 };
-float process_start = 0.0;
-float process_end = 0.0;
+ros::Time process_start;
+ros::Time process_end;
 bool cloud_cb_lock = true;
 
 pcl::PointCloud<pcl::PointXYZI>::Ptr raw_pcl(new pcl::PointCloud<pcl::PointXYZI>);
@@ -65,6 +66,7 @@ Eigen::MatrixXf pcl_to_eigen(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& pc
 
 void cloud_cb(const sensor_msgs::PointCloud2::ConstPtr& msg){
     if (!cloud_cb_lock){
+        process_start = ros::Time::now();
 
         // PointByPoint Filtering
         pcl::fromROSMsg (*msg, *raw_pcl);
@@ -201,11 +203,10 @@ void cloud_cb(const sensor_msgs::PointCloud2::ConstPtr& msg){
         vessel_msg.header.frame_id = "os_sensor";
         pub_vessel_pointcloud.publish(vessel_msg);
 
-        process_end = ros::Time::now().toSec() * 1000.0f;
-        process_end = std::round(process_end * 100) / 100.0;
+        process_end = ros::Time::now();
 
-        float time_lap = process_end - process_start;
-        ros::param::set("node2_processtime", std::round(time_lap * 100) / 100.0);
+        ros::Duration time_diff = process_end - process_start;
+        ros::param::set("node2_processtime", std::round(time_diff.toSec() * 100000.0) / 100.0);
 
         cloud_cb_lock = true;
     }
@@ -214,9 +215,6 @@ void cloud_cb(const sensor_msgs::PointCloud2::ConstPtr& msg){
 
 void fov_cb(const std_msgs::Float32MultiArray::ConstPtr& msg){
     if (cloud_cb_lock){
-        process_start = ros::Time::now().toSec() * 1000.0f;
-        process_start = std::round(process_start * 100) / 100.0;
-
         arr_cam_fov[0] = msg->data[0];
         arr_cam_fov[1] = msg->data[1];
         cloud_cb_lock = false;
