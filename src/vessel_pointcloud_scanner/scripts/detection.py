@@ -5,6 +5,7 @@
 
 import os
 import time
+import math
 import rospkg
 import rospy
 import numpy as np
@@ -161,7 +162,7 @@ class DetectionNode():
         return False, False
 
     def img_cb(self, data, args):
-        start = time.time() * 1000
+        start = "{:.2f}".format(rospy.Time.now().to_sec() * 1000.0)
 
         origin_img = self.bridge.imgmsg_to_cv2(data, desired_encoding="passthrough")
         bboxes, scores, cls_inds = self.forward(origin_img)
@@ -186,12 +187,8 @@ class DetectionNode():
         fov_data.data.append(cam_right_theta)
         self.fov_pub.publish(fov_data)
 
-        end = time.time() * 1000
-
-        max_length = len("[vessel_pointcloud_scanner] ==> [detection.py] node \033[91mRUNNING [0.00]ms\033[0m .....")
-        print(" " * max_length, end="\r")
-        print(f"[vessel_pointcloud_scanner] ==> [detection.py] node \033[91mRUNNING [{(end-start):.2f}]ms\033[0m " + "." * self.dot_cnt, end="\r", flush=True)
-        self.dot_cnt = (self.dot_cnt+1) if self.dot_cnt<self.dot_cnt_max else 0
+        end = "{:.2f}".format(rospy.Time.now().to_sec() * 1000.0)
+        rospy.set_param("node1_processtime", "{:.2f}".format(end-start))
 
 if __name__ == '__main__':
     rospy.init_node('detection')
