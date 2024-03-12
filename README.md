@@ -1,2 +1,2 @@
-# Boat-3DReID
-Boat 3DReID using raw/completed/reconstructed data
+# LiDAR-ReID-Model
+LiDAR-ReID-Model using raw/completed/reconstructed data
