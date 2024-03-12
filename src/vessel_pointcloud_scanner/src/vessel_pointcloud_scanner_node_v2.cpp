@@ -195,16 +195,15 @@ void cloud_cb(const sensor_msgs::PointCloud2::ConstPtr& msg){
             for (std::vector<int>::const_iterator cit = closest_cluster_it->indices.begin (); cit != closest_cluster_it->indices.end (); ++cit){
                 vessel_pcl.points.push_back(filtered_pcl->points[*cit]);
             }
+        
+            sensor_msgs::PointCloud2 vessel_msg;
+            pcl::toROSMsg(vessel_pcl, vessel_msg);
+            vessel_msg.header.frame_id = "os_sensor";
+            pub_vessel_pointcloud.publish(vessel_msg);
         }
         ////////////////////////////////////////////////////////////////////////
 
-        sensor_msgs::PointCloud2 vessel_msg;
-        pcl::toROSMsg(vessel_pcl, vessel_msg);
-        vessel_msg.header.frame_id = "os_sensor";
-        pub_vessel_pointcloud.publish(vessel_msg);
-
         process_end = ros::Time::now();
-
         ros::Duration time_diff = process_end - process_start;
         ros::param::set("node2_processtime", std::round(time_diff.toSec() * 100000.0) / 100.0);
 
