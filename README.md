@@ -1,5 +1,5 @@
-# PillarReID
-PillarReID using raw/completed/reconstructed data
+# Boat Scanner
+Boat Scanner using raw/completed/reconstructed data
 
 ## 0. How to Run
 ### 0.1. Filter Boat Point Cloud from Raw Rosbag
