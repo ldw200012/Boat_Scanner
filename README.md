@@ -1,5 +1,5 @@
 # Boat Scanner
-Boat Scanner using raw/completed/reconstructed data
+Scan single boat LiDAR point cloud, using 2D bounding box detection from YOLO.
 
 ## 0. How to Run
 ### 0.1. Filter Boat Point Cloud from Raw Rosbag
