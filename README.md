@@ -11,10 +11,9 @@ roslaunch vessel_pointcloud_scanner vessel_pointcloud_scanner.launch
 ```
 
 ### 0.2. Save Boat Point Cloud into Dataset Folder
+Change the Line 113 "pillar_extraction_node = PointPillarNode(CLASS_IDX)",
+where CLASS_IDX should be string value of class index (e.g. "0008")
 ```
 cd PillarReID/pillars_feature_extractor/scripts
-```
-Change the Line 113 "pillar_extraction_node = PointPillarNode(CLASS_IDX)", where CLASS_IDX should be string value of class index (e.g. "0008")
-```
 python create_dataset.py
 ```
